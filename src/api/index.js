@@ -1,5 +1,3 @@
-import 'es6-promise';
-
 function testAsync() {
   return new Promise(resolve => {
     setTimeout(() => {

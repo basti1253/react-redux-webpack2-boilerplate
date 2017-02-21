@@ -2,10 +2,9 @@ import { Map } from 'immutable';
 
 import {
   TEST_ACTION,
-  TEST_ASYNC_ACTION_START,
-  TEST_ASYNC_ACTION_ERROR,
-  TEST_ASYNC_ACTION_SUCCESS,
-} from 'actions/app';
+  TEST_IS_LOADING,
+  TEST_ASYNC_ACTION,
+} from '../actions/app';
 
 const initialState = Map({
   counter: 0,
@@ -23,20 +22,13 @@ const actionsMap = {
     });
   },
 
-  // Async action
-  [TEST_ASYNC_ACTION_START]: (state) => {
+  [TEST_IS_LOADING]: (state) => {
     return state.merge({
       asyncLoading: true,
       asyncError: null,
     });
   },
-  [TEST_ASYNC_ACTION_ERROR]: (state, action) => {
-    return state.merge({
-      asyncLoading: false,
-      asyncError: action.data,
-    });
-  },
-  [TEST_ASYNC_ACTION_SUCCESS]: (state, action) => {
+  [TEST_ASYNC_ACTION]: (state, action) => {
     return state.merge({
       asyncLoading: false,
       asyncData: action.data,

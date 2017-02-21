@@ -1,142 +1,34 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const DashboardPlugin = require('webpack-dashboard/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const cssNano = require('cssnano');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-const isProduction = nodeEnv === 'production';
-
-const jsSourcePath = path.join(__dirname, './source/js');
-const buildPath = path.join(__dirname, './build');
-const imgPath = path.join(__dirname, './source/assets/img');
-const sourcePath = path.join(__dirname, './source');
-
-// Common plugins
-const plugins = [
-  new webpack.optimize.CommonsChunkPlugin({
-    name: 'vendor',
-    minChunks: Infinity,
-    filename: 'vendor-[hash].js',
-  }),
-  new webpack.DefinePlugin({
-    'process.env': {
-      NODE_ENV: JSON.stringify(nodeEnv),
-    },
-  }),
-  new webpack.NamedModulesPlugin(),
-  new HtmlWebpackPlugin({
-    template: path.join(sourcePath, 'index.html'),
-    path: buildPath,
-    filename: 'index.html',
-  }),
-  new webpack.LoaderOptionsPlugin({
-    options: {
-      postcss: [
-        autoprefixer({
-          browsers: [
-            'last 3 version',
-            'ie >= 10',
-          ],
-        }),
-      ],
-      context: sourcePath,
-    },
-  }),
-];
-
-// Common rules
-const rules = [
-  {
-    test: /\.(js|jsx)$/,
-    exclude: /node_modules/,
-    use: [
-      'babel-loader',
-    ],
-  },
-  {
-    test: /\.(png|gif|jpg|svg)$/,
-    include: imgPath,
-    use: 'url-loader?limit=20480&name=assets/[name]-[hash].[ext]',
-  },
-];
-
-if (isProduction) {
-  // Production plugins
-  plugins.push(
-    new webpack.LoaderOptionsPlugin({
-      minimize: true,
-      debug: false,
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-        screw_ie8: true,
-        conditionals: true,
-        unused: true,
-        comparisons: true,
-        sequences: true,
-        dead_code: true,
-        evaluate: true,
-        if_return: true,
-        join_vars: true,
-      },
-      output: {
-        comments: false,
-      },
-    }),
-    new ExtractTextPlugin('style-[hash].css')
-  );
-
-  // Production rules
-  rules.push(
-    {
-      test: /\.scss$/,
-      loader: ExtractTextPlugin.extract({
-        fallbackLoader: 'style-loader',
-        loader: 'css-loader!postcss-loader!sass-loader',
-      }),
-    }
-  );
-} else {
-  // Development plugins
-  plugins.push(
-    new webpack.HotModuleReplacementPlugin(),
-    new DashboardPlugin()
-  );
-
-  // Development rules
-  rules.push(
-    {
-      test: /\.scss$/,
-      exclude: /node_modules/,
-      use: [
-        'style-loader',
-        // Using source maps breaks urls in the CSS loader
-        // https://github.com/webpack/css-loader/issues/232
-        // This comment solves it, but breaks testing from a local network
-        // https://github.com/webpack/css-loader/issues/232#issuecomment-240449998
-        // 'css-loader?sourceMap',
-        'css-loader',
-        'postcss-loader',
-        'sass-loader?sourceMap',
-      ],
-    }
-  );
-}
+const sourcePath = path.resolve(__dirname, 'src');
+const buildPath = path.resolve(__dirname, 'build');
+const imgPath = path.resolve(__dirname, 'src/img');
+const publicPath = path.resolve(__dirname, 'public');
 
 module.exports = {
-  devtool: isProduction ? 'eval' : 'source-map',
-  context: jsSourcePath,
+  // no sassy maps if using these options
+  // devtool: 'cheap-module-eval-source-map',
+  // devtool: '#eval-source-map',
+  devtool: 'source-map',
+  context: sourcePath,
   entry: {
-    js: './index.js',
+    js: [
+      './index.js',
+    ],
     vendor: [
       'babel-polyfill',
+      'classnames',
       'es6-promise',
       'immutable',
       'isomorphic-fetch',
+      'react-addons-pure-render-mixin',
       'react-dom',
       'react-redux',
       'react-router',
@@ -150,38 +42,110 @@ module.exports = {
     publicPath: '/',
     filename: 'app-[hash].js',
   },
-  module: {
-    rules,
-  },
   resolve: {
-    extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js', '.jsx'],
+    extensions: [
+      '.js',
+      '.jsx',
+      '.scss',
+      '.css'
+    ],
     modules: [
       path.resolve(__dirname, 'node_modules'),
-      jsSourcePath,
     ],
   },
-  plugins,
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: Infinity,
+      filename: 'vendor.[hash].js',
+    }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify(nodeEnv),
+      },
+    }),
+    new webpack.NamedModulesPlugin(),
+    new HtmlWebpackPlugin({
+      template: path.join(publicPath, 'index.html'),
+      path: buildPath,
+      filename: 'index.html',
+    }),
+    new webpack.LoaderOptionsPlugin({
+      debug: true,
+      options: {
+        context: publicPath,
+        postcss: [
+          autoprefixer(),
+          cssNano()
+        ],
+      },
+    }),
+    new ExtractTextPlugin('styles.[hash].css'),
+    new webpack.HotModuleReplacementPlugin()
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        include: sourcePath,
+        loader: 'babel-loader'
+      },
+      // Inline base64 URLs for <=8k images, direct URLs for the rest
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/,
+        loader: 'url-loader',
+        include: imgPath,
+        query: {
+          limit: 8192,
+          name: 'assets/img/[name].[ext]?[hash]'
+        }
+      },
+      // Fonts
+      {
+        test: /\.(woff|woff2|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'url-loader',
+        query: {
+          limit: 8192,
+          name: 'fonts/[name].[ext]?[hash]'
+        }
+      },
+      {
+        test: [/\.scss$/i, /\.css$/],
+        loader: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: 'css-loader',
+              query: {
+                minimize: false,
+                sourceMap: true,
+                importLoaders: 2,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              query: {
+                sourceMap: true,
+              },
+            },
+            {
+              loader: 'sass-loader',
+              query: {
+                sourceMap: true,
+              },
+            }
+          ]
+        }),
+      }
+    ]
+  },
   devServer: {
-    contentBase: isProduction ? './build' : './source',
+    contentBase: './public',
     historyApiFallback: true,
     port: 3000,
-    compress: isProduction,
-    inline: !isProduction,
-    hot: !isProduction,
-    host: '0.0.0.0',
-    stats: {
-      assets: true,
-      children: false,
-      chunks: false,
-      hash: false,
-      modules: false,
-      publicPath: false,
-      timings: true,
-      version: false,
-      warnings: true,
-      colors: {
-        green: '\u001b[32m',
-      },
-    },
+    compress: false,
+    inline: true,
+    hot: true,
+    stats: 'errors-only',
+    host: '0.0.0.0'
   },
 };
