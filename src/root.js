@@ -3,9 +3,9 @@ import { Provider } from 'react-redux';
 import { Router } from 'react-router';
 import routes from './routes';
 
-let Root = ({ store, history }) => (
-  <Provider store={store}>
-    <Router history={history} routes={routes} />
+const Root = ({ store, history }) => (
+  <Provider store={ store }>
+    <Router history={ history } routes={ routes } />
   </Provider>
 );
 

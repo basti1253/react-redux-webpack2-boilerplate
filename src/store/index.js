@@ -5,11 +5,11 @@ import immutableStateInvariant from 'redux-immutable-state-invariant';
 import logger from '../dev/logger';
 
 import rootReducer from '../reducers';
+
 const isProduction = process.env.NODE_ENV === 'production';
 
 export default function configureStore() {
-
-  let middleWares = [
+  const middleWares = [
     thunk,
     promiseMiddleware,
     immutableStateInvariant()

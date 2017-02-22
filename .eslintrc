@@ -30,13 +30,7 @@ rules:
   no-return-assign: 0
   quote-props: 0
   template-curly-spacing: [2, "always"]
-  comma-dangle: ["error", {
-    "arrays": "always-multiline",
-    "objects": "always-multiline",
-    "imports": "always-multiline",
-    "exports": "always-multiline",
-    "functions": "never"
-  }]
+  comma-dangle: ["error", "ignore"]
   jsx-quotes: [2, "prefer-single"]
   react/forbid-prop-types: 0
   react/jsx-curly-spacing: [2, "always"]

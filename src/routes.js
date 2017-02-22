@@ -17,7 +17,7 @@ export default (
   <Route path={ publicPath } component={ App }>
     <IndexRoute component={ Dashboard } />
     <Route path={ routeCodes.ABOUT } component={ About } />
-    <Route path="404" component={NotFound} />
-    <Redirect from="*" to="404" />
+    <Route path='404' component={ NotFound } />
+    <Redirect from='*' to='404' />
   </Route>
 );

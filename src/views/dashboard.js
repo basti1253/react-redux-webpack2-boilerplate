@@ -1,22 +1,26 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { testAction, testAsync } from '../actions/app';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import { testAction, testAsync } from '../actions/app';
 
 export class DashboardComponent extends Component {
 
-  mixins = [
-    PureRenderMixin
-  ];
-
   static propTypes = {
     asyncData: PropTypes.string,
-    asyncError: PropTypes.object,
     asyncLoading: PropTypes.bool,
     counter: PropTypes.number.isRequired,
     // from react-redux connect
     dispatch: PropTypes.func.isRequired,
   };
+
+  static defaultProps = {
+    asyncData: null,
+    asyncLoading: false,
+  };
+
+  mixins = [
+    PureRenderMixin
+  ];
 
   handleAsyncButtonClick() {
     const { dispatch } = this.props;
@@ -31,7 +35,6 @@ export class DashboardComponent extends Component {
   render() {
     const {
       asyncData,
-      asyncError,
       asyncLoading,
       counter,
     } = this.props;
@@ -52,7 +55,6 @@ export class DashboardComponent extends Component {
           <h3>Async action example</h3>
           <p>{ asyncData }</p>
           { asyncLoading && <p>Loading...</p> }
-          { asyncError && <p>Error: { asyncError }</p> }
           <button
             disabled={ asyncLoading }
             onClick={ () => this.handleAsyncButtonClick() }
@@ -73,7 +75,6 @@ export class DashboardComponent extends Component {
 
 const mapStateToProps = (state) => ({
   asyncData: state.app.get('asyncData'),
-  asyncError: state.app.get('asyncError'),
   asyncLoading: state.app.get('asyncLoading'),
   counter: state.app.get('counter'),
 });
@@ -88,4 +89,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(DashboardComponent)
+)(DashboardComponent);

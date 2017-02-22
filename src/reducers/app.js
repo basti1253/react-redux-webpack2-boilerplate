@@ -9,7 +9,6 @@ import {
 const initialState = Map({
   counter: 0,
   asyncLoading: false,
-  asyncError: null,
   asyncData: null,
 });
 
@@ -31,7 +30,7 @@ const actionsMap = {
   [TEST_ASYNC_ACTION]: (state, action) => {
     return state.merge({
       asyncLoading: false,
-      asyncData: action.data,
+      asyncData: action.payload,
     });
   },
 };

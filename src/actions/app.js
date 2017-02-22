@@ -11,9 +11,9 @@ export const testisLoading = createAction(TEST_IS_LOADING);
 
 const testAsyncAction = createAction(TEST_ASYNC_ACTION, () => api.testAsync());
 
-export function testAsync(dispatcher) {
+export function testAsync() {
   return (dispatch) => {
     dispatch(testisLoading());
     dispatch(testAsyncAction());
-  }
+  };
 }
