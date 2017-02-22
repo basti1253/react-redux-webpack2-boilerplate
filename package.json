@@ -1,11 +1,11 @@
 {
-  "name": "feedreader-client",
+  "name": "react-redux-webpack2-boilerplate",
   "description": "",
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "cross-env NODE_ENV=development webpack-dev-server",
     "prebuild": "rimraf -- build",
     "build": "cross-env NODE_ENV=production webpack --progress --profile --bail",
     "lint": "eslint ./src ./webpack.config.js -f table --ext .js --ext .jsx",
