@@ -6,11 +6,71 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const cssNano = require('cssnano');
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+const nodeEnv = process.env.NODE_ENV || 'production';
+const isProductionBuild = nodeEnv !== 'development';
 const sourcePath = path.resolve(__dirname, 'src');
 const buildPath = path.resolve(__dirname, 'build');
 const imgPath = path.resolve(__dirname, 'src/img');
 const publicPath = path.resolve(__dirname, 'public');
+
+let plugins = [
+  new webpack.optimize.CommonsChunkPlugin({
+    name: 'vendor',
+    minChunks: Infinity,
+    filename: 'vendor.[hash].js',
+  }),
+  new webpack.DefinePlugin({
+    'process.env': {
+      NODE_ENV: JSON.stringify(nodeEnv),
+    },
+  }),
+  new webpack.NamedModulesPlugin(),
+  new HtmlWebpackPlugin({
+    template: path.join(publicPath, 'index.html'),
+    path: buildPath,
+    filename: 'index.html',
+  }),
+  new webpack.LoaderOptionsPlugin({
+    minimize: isProductionBuild,
+    debug: !isProductionBuild,
+    options: {
+      context: publicPath,
+      postcss: [
+        autoprefixer(),
+        cssNano()
+      ],
+    },
+  }),
+  new ExtractTextPlugin('styles.[hash].css')
+];
+
+if (isProductionBuild) {
+  plugins = [
+    ...plugins,
+    new webpack.optimize.UglifyJsPlugin({
+      // https://github.com/webpack/webpack/issues/2704
+      sourceMap: true,
+      compress: {
+        warnings: false,
+        screw_ie8: true,
+        conditionals: true,
+        unused: true,
+        comparisons: true,
+        sequences: true,
+        dead_code: true,
+        evaluate: true,
+        if_return: true,
+        join_vars: true,
+      },
+      output: {
+        // don't use false - keep copyright notices
+        comments: 'some',
+      },
+    }),
+  ];
+} else {
+  plugins.push(new webpack.HotModuleReplacementPlugin());
+}
 
 module.exports = {
   // no sassy maps if using these options
@@ -53,36 +113,7 @@ module.exports = {
       path.resolve(__dirname, 'node_modules'),
     ],
   },
-  plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks: Infinity,
-      filename: 'vendor.[hash].js',
-    }),
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(nodeEnv),
-      },
-    }),
-    new webpack.NamedModulesPlugin(),
-    new HtmlWebpackPlugin({
-      template: path.join(publicPath, 'index.html'),
-      path: buildPath,
-      filename: 'index.html',
-    }),
-    new webpack.LoaderOptionsPlugin({
-      debug: true,
-      options: {
-        context: publicPath,
-        postcss: [
-          autoprefixer(),
-          cssNano()
-        ],
-      },
-    }),
-    new ExtractTextPlugin('styles.[hash].css'),
-    new webpack.HotModuleReplacementPlugin()
-  ],
+  plugins,
   module: {
     rules: [
       {
@@ -92,17 +123,17 @@ module.exports = {
       },
       // Inline base64 URLs for <=8k images, direct URLs for the rest
       {
-        test: /\.(png|jpg|jpeg|gif|svg)$/,
+        test: /\.(png|jpe?g|gif|svg)$/,
         loader: 'url-loader',
         include: imgPath,
         query: {
           limit: 8192,
-          name: 'assets/img/[name].[ext]?[hash]'
+          name: 'img/[name].[ext]?[hash]'
         }
       },
       // Fonts
       {
-        test: /\.(woff|woff2|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        test: /\.(woff2?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
         loader: 'url-loader',
         query: {
           limit: 8192,
@@ -139,12 +170,12 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: './public',
+    contentBase: isProductionBuild ? './build' : './public',
     historyApiFallback: true,
     port: 3000,
-    compress: false,
-    inline: true,
-    hot: true,
+    compress: isProductionBuild,
+    inline: !isProductionBuild,
+    hot: !isProductionBuild,
     stats: 'errors-only',
     host: '0.0.0.0'
   },

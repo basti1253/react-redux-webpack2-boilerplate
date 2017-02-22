@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "prebuild": "rimraf -- build",
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "cross-env NODE_ENV=production webpack --progress --profile --bail",
     "lint": "eslint ./src ./webpack.config.js -f table --ext .js --ext .jsx",
     "preview": "cross-env NODE_ENV=production webpack-dev-server"
   },
