@@ -30,7 +30,11 @@ if (loadedStates.includes(document.readyState) && document.body) {
 
 if (module.hot) {
   module.hot.accept('./root', () => {
-    const NextRoot = require('./root').default; // eslint-disable-line global-require
+    /* eslint-disable */
+    // ignore this line as eslint --fix switches to const
+    // and using const here breaks HMR
+    let NextRoot = require('./root').default;
+    /* eslint-enable */
     render(
       <NextRoot store={ store } history={ history } />,
       document.getElementById('app')
