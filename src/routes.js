@@ -1,10 +1,10 @@
 import React from 'react';
 import { Redirect, Route, IndexRoute } from 'react-router';
 
-import App from './views/app';
-import Dashboard from './views/dashboard';
-import About from './views/about';
-import NotFound from './views/not-found';
+import App from './components/app';
+import Dashboard from './containers/dashboard';
+import About from './components/about';
+import NotFound from './components/not-found';
 
 const publicPath = '/';
 

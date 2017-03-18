@@ -20,14 +20,14 @@ export default function configureStore() {
 
   middleWares = [...middleWares, logger];
 
+  /* eslint-disable no-underscore-dangle */
+  if (!window.__REDUX_DEVTOOLS_EXTENSION__) {
+    return createStore(reducer, compose(applyMiddleware(...middleWares)));
+  }
   return createStore(
     reducer,
-    compose(
-      applyMiddleware(...middleWares),
-      /* eslint-disable no-underscore-dangle */
-      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-      /* eslint-enable */
-    )
+    compose(applyMiddleware(...middleWares), window.__REDUX_DEVTOOLS_EXTENSION__())
   );
+  /* eslint-enable */
 }
 

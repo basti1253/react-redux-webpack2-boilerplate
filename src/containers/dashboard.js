@@ -1,9 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { testAction, testAsync } from '../actions/app';
 
-export class DashboardComponent extends Component {
+export class DashboardComponent extends PureComponent {
 
   static propTypes = {
     asyncData: PropTypes.string,
@@ -17,10 +16,6 @@ export class DashboardComponent extends Component {
     asyncData: null,
     asyncLoading: false,
   };
-
-  mixins = [
-    PureRenderMixin
-  ];
 
   handleAsyncButtonClick() {
     const { dispatch } = this.props;

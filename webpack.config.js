@@ -88,7 +88,6 @@ module.exports = {
       'es6-promise',
       'immutable',
       'isomorphic-fetch',
-      'react-addons-pure-render-mixin',
       'react-dom',
       'react-redux',
       'react-router',
